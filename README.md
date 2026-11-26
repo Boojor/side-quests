@@ -2,7 +2,7 @@
 
 Detours I took when something kept breaking my flow. Each one fixed it. Help yourself.
 
-![A tabby cat stares into the camera while pushing a coffee mug off the desk](images/cat.gif)
+<img src="images/cat.gif" width="100%" alt="A pink cat with shiny dragonfly fairy wings stares into the camera in an ordinary office while pushing a coffee cup off the desk">
 
 | Item | What it does |
 |---|---|
