@@ -200,9 +200,8 @@ by the next worker, not by the reader.
 - **A part 1 that is already one plain sentence** still gets the heading and one
   plain sentence under it. Say it in other words; do not paste the same sentence.
 
-The reader's own global rules (for example in `~/.claude/CLAUDE.md`) still apply
-to the whole reply. The author's include: no em dashes, one question at a time, a
-TL;DR Action Item when a decision is needed, full paths for files.
+The reader's own rules for how replies should look (for example in their
+`CLAUDE.md`) still apply to the whole reply.
 
 **Exact where it must be exact:**
 

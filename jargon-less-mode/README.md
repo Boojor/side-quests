@@ -72,9 +72,9 @@ repository (`cd jargon-less-mode`).
 3. Make sure `jq` is installed (`jq --version`). If not: on a Mac `brew install jq`, on Linux your package manager
    (for example `sudo apt install jq`).
 4. Add the hook setting to `~/.claude/settings.json`. **Never replace that file with the snippet**: it holds your other
-   settings. If the file exists, back it up first:
+   settings. If the file exists, back it up first (the date in the name means an older backup is never overwritten):
    ```bash
-   cp ~/.claude/settings.json ~/.claude/settings.json.bak
+   cp ~/.claude/settings.json ~/.claude/"settings.json.bak-$(date +%Y%m%d-%H%M%S)"
    ```
    - No `settings.json` yet: copy the snippet in as that file (`-n` never overwrites a file that is already there):
      ```bash
@@ -129,6 +129,7 @@ No hook, nothing runs on its own. Good for trying it out.
    - `~/.claude/hooks/jargon-mode.sh`
    - `~/.claude/.jargon-mode/` (the off notes)
    - `~/.claude/skills/technical-jargon-translator/` (on Windows: `%USERPROFILE%\.claude\skills\technical-jargon-translator\`)
+   - `~/.claude/settings.json.bak-...` (the install backup), once you are sure your `settings.json` is fine
 3. Quit and reopen Claude Code.
 
 ## Credits
@@ -148,3 +149,9 @@ No hook, nothing runs on its own. Good for trying it out.
 ## Licence
 
 MIT. See `LICENSE` at the top of this repository.
+
+## What changed
+
+- **1.1 (2026-11-26):** the install backup gets the date in its name, so it never overwrites an older backup, and
+  Uninstall lists it. The skill no longer lists my own writing rules.
+- **1.0 (2026-11-26):** first version.
