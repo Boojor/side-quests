@@ -4,8 +4,6 @@ Detours I took when something kept breaking my flow. Each one fixed it. Help you
 
 ![A tabby cat stares into the camera while pushing a coffee mug off the desk](images/cat.gif)
 
-*Made with AI. No cats or mugs were harmed.*
-
 | Item | What it does |
 |---|---|
 | [jargon-less-mode](jargon-less-mode/) | Every reply ends with just the TL;DR you need: what to decide, what could break, what nobody checked. |
