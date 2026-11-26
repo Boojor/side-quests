@@ -4,6 +4,8 @@ Detours I took when something kept breaking my flow. Each one fixed it. Help you
 
 | Item | What it does |
 |---|---|
-| [jargon-less-mode](jargon-less-mode/) | Claude answers twice: the normal reply, then a short "What this actually means" in plain, true words |
+| [jargon-less-mode](jargon-less-mode/) | Every reply ends with just the TL;DR you need: what to decide, what could break, what nobody checked. |
+
+Click an item for what it does and how to set it up.
 
 Each item credits what it is built on. Licence: MIT (see `LICENSE`), unless an item says otherwise.
