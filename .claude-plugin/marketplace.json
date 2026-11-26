@@ -1,0 +1,12 @@
+{
+  "name": "side-quests",
+  "owner": { "name": "Orly Boojor" },
+  "description": "Detours I took when something kept breaking my flow. Each one fixed it. Help yourself.",
+  "plugins": [
+    {
+      "name": "work-timer",
+      "source": "./work-timer",
+      "description": "Counts minutes while Claude works and nudges both of you after 10 minutes with nothing to show"
+    }
+  ]
+}

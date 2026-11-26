@@ -1,0 +1,7 @@
+{
+  "name": "work-timer",
+  "version": "1.0.0",
+  "description": "Counts minutes while Claude works: a status line, a notification and a reminder to Claude after 10 minutes with nothing shown to you",
+  "author": { "name": "Orly Boojor" },
+  "license": "MIT"
+}
