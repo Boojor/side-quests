@@ -1,0 +1,12 @@
+# Never in this repo
+.DS_Store
+.env
+.env.*
+*.key
+*.pem
+.htpasswd
+.mcp.json
+claude_desktop_config.json
+__pycache__/
+*.pyc
+node_modules/
