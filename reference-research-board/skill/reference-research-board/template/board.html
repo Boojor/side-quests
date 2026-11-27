@@ -1,0 +1,459 @@
+<title>__TITLE__</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Assistant:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: sticky part rail on the left, one long column of parts, reference cards in a wrapping grid per part */
+:root {
+  --bg: #f3f3f1;
+  --surface: #ffffff;
+  --ink: #17181a;
+  --muted: #62656b;
+  --line: #dcdcd8;
+  --accent: #1d4ed8;
+  --yes: #14733b;
+  --yes-bg: #e3f3e8;
+  --no: #a1291f;
+  --no-bg: #f8e5e2;
+  --part: #8a5a00;
+  --part-bg: #fbf0d6;
+  --done-bg: #e8edfb;
+  --font-display: "Bricolage Grotesque", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #121315; --surface: #1b1c1f; --ink: #ececea; --muted: #9a9da3; --line: #2e3034;
+    --accent: #7ea2ff; --yes: #6fd39a; --yes-bg: #173324; --no: #f08b80; --no-bg: #3a1c19; --part: #e6b450; --part-bg: #362a10; --done-bg: #1c2340;
+    color-scheme: dark;
+  }
+}
+:root.text-board {
+  /* Text boards (every ref has a `line`): one font for the whole page, with Hebrew */
+  --font-display: "Assistant", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Assistant", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "Assistant", "Segoe UI", system-ui, sans-serif;
+}
+:root[data-theme="dark"] {
+  --bg: #121315; --surface: #1b1c1f; --ink: #ececea; --muted: #9a9da3; --line: #2e3034;
+  --accent: #7ea2ff; --yes: #6fd39a; --yes-bg: #173324; --no: #f08b80; --no-bg: #3a1c19; --part: #e6b450; --part-bg: #362a10; --done-bg: #1c2340;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.5; }
+a { color: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.wrap { max-width: 1320px; margin: 0 auto; padding-inline: 24px; padding-block: 40px 96px; display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 48px; }
+@media (max-width: 900px) { .wrap { grid-template-columns: minmax(0, 1fr); gap: 24px; padding-inline: 16px; } .rail { position: static !important; } }
+
+.rail { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 24px); align-self: start; display: grid; gap: 20px; }
+.rail h1 { font-family: var(--font-display); font-weight: 700; font-size: 26px; line-height: 1.05; margin: 0; letter-spacing: -0.01em; }
+.rail p { margin: 0; color: var(--muted); font-size: 13px; }
+.progress { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+.progress b { color: var(--ink); font-weight: 500; }
+.bar { height: 4px; background: var(--line); border-radius: 2px; overflow: hidden; }
+.bar i { display: block; height: 100%; width: 0; background: var(--ink); transition: width .3s ease; }
+.nav { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.nav a { display: grid; grid-template-columns: 22px 1fr auto; gap: 6px; align-items: baseline; padding: 5px 8px; border-radius: 6px; color: var(--ink); text-decoration: none; font-size: 14px; }
+.nav a:hover { background: var(--surface); }
+.nav .n { font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+.nav .c { font-family: var(--font-mono); font-size: 11px; color: var(--yes); }
+.filters { display: flex; flex-wrap: wrap; gap: 6px; }
+.filters button { font: 500 12px var(--font-body); padding: 5px 10px; border-radius: 999px; border: 1px solid var(--line); background: transparent; color: var(--ink); cursor: pointer; }
+.filters button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.status { font-size: 12px; color: var(--muted); }
+.status.warn { color: var(--no); }
+.donebtn { font: 600 14px var(--font-body); padding: 10px 14px; border-radius: 8px; border: 1px solid var(--ink); background: var(--ink); color: var(--bg); cursor: pointer; }
+.donebtn.reopen { background: transparent; color: var(--ink); }
+.donebtn:disabled { opacity: .4; cursor: not-allowed; }
+
+main { display: grid; gap: 72px; min-width: 0; }
+.intro { display: grid; gap: 10px; max-width: 68ch; }
+.intro h2 { font-family: var(--font-display); font-weight: 700; font-size: clamp(30px, 4vw, 44px); line-height: 1.02; margin: 0; letter-spacing: -0.02em; text-wrap: balance; }
+.intro p { margin: 0; color: var(--muted); }
+.banner { padding: 14px 16px; border-radius: 10px; background: var(--done-bg); display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; }
+.banner p { margin: 0; }
+
+section.part { display: grid; gap: 20px; scroll-margin-top: 24px; }
+.part-head { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 16px; align-items: baseline; border-top: 2px solid var(--ink); padding-top: 14px; }
+.part-num { font-family: var(--font-mono); font-size: 13px; color: var(--muted); grid-row: span 2; }
+.part-head h3 { font-family: var(--font-display); font-weight: 700; font-size: 26px; margin: 0; letter-spacing: -0.01em; }
+.job { margin: 0; color: var(--muted); max-width: 70ch; }
+.job b { color: var(--ink); font-weight: 600; }
+
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; display: grid; grid-template-rows: auto 1fr; transition: border-color .2s, opacity .2s; }
+.card[data-state="up"] { border-color: var(--yes); box-shadow: 0 0 0 1px var(--yes); }
+.card[data-state="part"] { border-color: var(--part); box-shadow: 0 0 0 1px var(--part); }
+.card[data-state="down"] { opacity: .55; }
+.card[data-state="down"]:hover, .card[data-state="down"]:focus-within { opacity: 1; }
+.shot { position: relative; aspect-ratio: 16 / 10; background: var(--line); overflow: hidden; border-bottom: 1px solid var(--line); cursor: zoom-in; max-width: 100%; }
+.shot img { width: 100%; height: 100%; object-fit: cover; object-position: top; display: block; }
+.shot img.tall { object-fit: contain; object-position: center; background: #000; }
+.shot .missing { position: absolute; inset: 0; display: grid; place-items: center; color: var(--muted); font-family: var(--font-mono); font-size: 12px; text-align: center; padding: 16px; }
+.snip { margin: 0; padding: 26px 22px 22px; font-family: "Assistant", "Segoe UI", system-ui, sans-serif; font-weight: 600; font-size: 22px; line-height: 1.4; white-space: pre-line; border-bottom: 1px solid var(--line); min-height: 150px; display: flex; align-items: center; text-wrap: pretty; }
+.snip[dir="rtl"] { text-align: right; }
+.frames { position: absolute; left: 10px; bottom: 10px; display: flex; gap: 4px; }
+.frames button { font: 500 11px var(--font-mono); padding: 3px 8px; border-radius: 4px; border: 0; background: rgba(0,0,0,.65); color: #fff; cursor: pointer; }
+.frames button[aria-pressed="true"] { background: #fff; color: #000; }
+.kind { position: absolute; right: 10px; top: 10px; font: 500 10.5px var(--font-mono); text-transform: uppercase; letter-spacing: .06em; padding: 3px 7px; border-radius: 4px; background: rgba(0,0,0,.65); color: #fff; }
+.body { padding: 14px 16px 16px; display: grid; gap: 10px; align-content: start; }
+.meta { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+.site { font-weight: 600; font-size: 16px; min-width: 0; }
+.site small { font-weight: 400; color: var(--muted); font-size: 13px; }
+.live { font-size: 13px; white-space: nowrap; }
+.tags { display: flex; flex-wrap: wrap; gap: 5px; }
+.tag { font: 500 10.5px var(--font-mono); text-transform: uppercase; letter-spacing: .06em; padding: 2px 7px; border-radius: 4px; border: 1px solid var(--line); color: var(--muted); }
+.steal { margin: 0; font-size: 14px; }
+.moved { margin: 0; font-size: 13px; color: var(--muted); }
+.vote { display: flex; gap: 6px; }
+.vote button { flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 5px; font: 500 13px var(--font-body); padding: 8px 6px; white-space: nowrap; border-radius: 7px; border: 1px solid var(--line); background: transparent; color: var(--ink); cursor: pointer; }
+.vote button svg { width: 15px; height: 15px; }
+.vote .up[aria-pressed="true"] { background: var(--yes-bg); border-color: var(--yes); color: var(--yes); }
+.vote .part[aria-pressed="true"] { background: var(--part-bg); border-color: var(--part); color: var(--part); }
+.vote .down[aria-pressed="true"] { background: var(--no-bg); border-color: var(--no); color: var(--no); }
+.vote button:disabled, textarea:disabled { cursor: not-allowed; opacity: .6; }
+textarea { width: 100%; min-height: 60px; resize: vertical; font: 14px/1.4 var(--font-body); color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 7px; padding: 8px 10px; }
+textarea.dragover { border-color: var(--accent); }
+textarea::placeholder { color: var(--muted); }
+.pastes { display: flex; flex-wrap: wrap; gap: 6px; }
+.pastes:empty { display: none; }
+.paste { position: relative; width: 84px; height: 56px; border-radius: 5px; overflow: hidden; border: 1px solid var(--line); cursor: zoom-in; }
+.paste img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.paste button { position: absolute; top: 2px; right: 2px; width: 20px; height: 20px; border-radius: 50%; border: 0; background: rgba(0,0,0,.7); color: #fff; font: 600 12px/20px var(--font-body); padding: 0; cursor: pointer; }
+.part-note label { display: block; font: 500 11px var(--font-mono); text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 6px; }
+.part-note { display: grid; gap: 6px; }
+.saved { font: 11px var(--font-mono); color: var(--muted); min-height: 1em; }
+.finish { display: grid; gap: 10px; justify-items: start; border-top: 2px solid var(--ink); padding-top: 16px; }
+.finish p { margin: 0; color: var(--muted); max-width: 60ch; }
+
+dialog { border: 0; padding: 0; max-width: min(1200px, 94vw); background: transparent; }
+dialog::backdrop { background: rgba(0,0,0,.8); }
+dialog img { display: block; max-width: 100%; max-height: 88vh; border-radius: 6px; }
+dialog button { position: absolute; top: 8px; right: 8px; font: 500 12px var(--font-body); padding: 6px 10px; border-radius: 6px; border: 0; background: #fff; color: #000; cursor: pointer; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+  <aside class="rail">
+    <h1 id="boardTitle"></h1>
+    <p id="kicker"></p>
+    <div>
+      <div class="progress"><b id="doneCount">0</b> of <span id="totalCount">0</span> marked · <b id="upCount">0</b> steal · <b id="partCount">0</b> partial</div>
+      <div class="bar"><i id="barFill"></i></div>
+    </div>
+    <div class="filters" role="group" aria-label="Show">
+      <button type="button" data-filter="all" aria-pressed="true">All</button>
+      <button type="button" data-filter="open" aria-pressed="false">Not marked</button>
+      <button type="button" data-filter="up" aria-pressed="false">Steal</button>
+      <button type="button" data-filter="part" aria-pressed="false">Partial</button>
+      <button type="button" data-filter="down" aria-pressed="false">Skip</button>
+    </div>
+    <ol class="nav" id="nav"></ol>
+    <button type="button" class="donebtn" id="doneRail" disabled>I'm done</button>
+    <div class="status" id="status">Connecting so your picks save…</div>
+  </aside>
+
+  <main id="main">
+    <div class="intro" id="intro"></div>
+    <div class="banner" id="banner" hidden><p id="bannerText"></p><button type="button" class="donebtn reopen" id="reopenBanner">Reopen</button></div>
+  </main>
+</div>
+
+<dialog id="zoom"><img id="zoomImg" alt=""><button type="button" id="zoomClose">Close</button></dialog>
+
+<script type="application/json" id="board-data">__BOARD_DATA__</script>
+<script>
+const DATA = JSON.parse(document.getElementById("board-data").textContent);
+const PARTS = DATA.parts;
+const REFS = DATA.refs;
+if (REFS.length && REFS.every(r => r.line)) document.documentElement.classList.add("text-board");
+const KINDS = { website: "Website", product: "Product UI", video: "Video", social: "Social post", image: "Image" };
+const THUMB_UP = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 10v11H3V10h4z"/><path d="M7 10l4-8a3 3 0 0 1 3 3v4h6a2 2 0 0 1 2 2.3l-1.4 8A2 2 0 0 1 18.6 21H7"/></svg>';
+const HALF = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/></svg>';
+const NOTE_HINT = { "": "Why? What exactly would you take?", up: "Why? What exactly would you take?", part: "Which part would you take, and what would you leave?", down: "Why skip it?" };
+const THUMB_DOWN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 14V3h4v11h-4z"/><path d="M17 14l-4 8a3 3 0 0 1-3-3v-4H4a2 2 0 0 1-2-2.3l1.4-8A2 2 0 0 1 5.4 3H17"/></svg>';
+
+// Every saved thing lives in `docs`, keyed by store path: votes/<refId>, parts/<partId>, round/state.
+// Tall pictures (portrait reels) are shown whole. Capture listener, so it works even where inline handlers are blocked.
+document.addEventListener("load", e => { const t = e.target; if (t && t.matches && t.matches(".shot img")) t.classList.toggle("tall", t.naturalHeight > t.naturalWidth); }, true);
+const state = { docs: {}, filter: "all", db: null, assets: null, canWrite: false, done: false, doneAt: "" };
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+// Text that may hold <b> (intro, part job): escape everything, then allow back only <b> and </b>.
+const bold = s => esc(s).replace(/&lt;(\/?)b&gt;/g, "<$1b>");
+// Links only to http and https pages; anything else (javascript:, data:) becomes a dead link.
+const safeUrl = u => /^https?:\/\//i.test(String(u ?? "")) ? String(u) : "#";
+const refDoc = id => state.docs["votes/" + id] || {};
+const partDoc = id => state.docs["parts/" + id] || {};
+
+function build() {
+  document.getElementById("boardTitle").textContent = DATA.title;
+  document.getElementById("kicker").textContent = DATA.kicker || "";
+  document.getElementById("intro").innerHTML =
+    `<h2>${esc(DATA.question)}</h2>` + (DATA.intro || []).map(p => `<p>${bold(p)}</p>`).join("") +
+    `<p>Mark each card <b>Steal</b>, <b>Partial</b> (take one piece of it) or <b>Skip</b>, and add a note. Paste a screenshot into any note with ⌘V. Everything saves as a draft while you work; press <b>I'm done</b> when you are finished.</p>`;
+  const main = document.getElementById("main");
+  const nav = document.getElementById("nav");
+  PARTS.forEach((p, i) => {
+    const num = String(i + 1).padStart(2, "0");
+    nav.insertAdjacentHTML("beforeend", `<li><a href="#${esc(p.id)}"><span class="n">${num}</span><span>${esc(p.name)}</span><span class="c" data-count="${esc(p.id)}"></span></a></li>`);
+    const cards = REFS.filter(r => r.part === p.id).map(r => `
+      <article class="card" data-ref="${esc(r.id)}">
+        ${r.line ? `<blockquote class="snip" dir="${r.lang === "he" ? "rtl" : "ltr"}" lang="${esc(r.lang || "en")}">${esc(r.line)}</blockquote>` : `<div class="shot" data-zoom>
+          <img src="refs/${esc(r.img)}" alt="${esc(r.site)}, ${esc(r.where)}" loading="lazy" onload="this.classList.toggle('tall', this.naturalHeight > this.naturalWidth)" onerror="this.hidden=true;this.parentElement.querySelector('.missing').hidden=false">
+          <div class="missing" hidden>No capture.<br>Open the source.</div>
+          ${r.kind ? `<span class="kind">${KINDS[r.kind] || esc(r.kind)}</span>` : ""}
+          ${r.img2 ? `<div class="frames"><button type="button" data-frame="1" aria-pressed="true">Frame 1</button><button type="button" data-frame="2" aria-pressed="false">Frame 2</button></div>` : ""}
+        </div>`}
+        <div class="body">
+          <div class="meta"><div class="site">${esc(r.site)} <small>· ${esc(r.where)}</small></div><a class="live" href="${esc(safeUrl(r.url))}" target="_blank" rel="noopener noreferrer">${r.timestamp ? "Watch at " + esc(r.timestamp) : "Open source"} ↗</a></div>
+          <div class="tags">${(r.tags || []).map(t => `<span class="tag">${esc(t)}</span>`).join("")}</div>
+          <p class="steal">${esc(r.steal)}</p>
+          ${r.moved ? `<p class="moved">Seen moving: ${esc(r.moved)}</p>` : ""}
+          <div class="vote">
+            <button type="button" class="up" data-vote="up" aria-pressed="false" disabled>${THUMB_UP}Steal</button>
+            <button type="button" class="part" data-vote="part" aria-pressed="false" disabled>${HALF}Partial</button>
+            <button type="button" class="down" data-vote="down" aria-pressed="false" disabled>${THUMB_DOWN}Skip</button>
+          </div>
+          <textarea id="note-${esc(r.id)}" data-path="votes/${esc(r.id)}" placeholder="Why? What exactly would you take?" disabled></textarea>
+          <div class="pastes" data-pastes="votes/${esc(r.id)}"></div>
+          <div class="saved" data-saved="votes/${esc(r.id)}"></div>
+        </div>
+      </article>`).join("");
+    main.insertAdjacentHTML("beforeend", `
+      <section class="part" id="${esc(p.id)}">
+        <div class="part-head"><span class="part-num">${num}</span><h3>${esc(p.name)}</h3><p class="job">${bold(p.job)}</p></div>
+        <div class="cards">${cards}</div>
+        <div class="part-note"><label for="partnote-${esc(p.id)}">Anything missing for this part?</label>
+          <textarea id="partnote-${esc(p.id)}" data-path="parts/${esc(p.id)}" placeholder="A reference you remember, a feeling you want, what none of these get right" disabled></textarea>
+          <div class="pastes" data-pastes="parts/${esc(p.id)}"></div>
+          <div class="saved" data-saved="parts/${esc(p.id)}"></div></div>
+      </section>`);
+  });
+  main.insertAdjacentHTML("beforeend", `<div class="finish"><p>Finished? Press <b>I'm done</b>. Your picks lock so Claude reads the final version. You can reopen any time.</p><button type="button" class="donebtn" id="doneBottom" disabled>I'm done</button></div>`);
+  document.getElementById("totalCount").textContent = REFS.length;
+}
+
+function renderPastes(el, ids) {
+  const key = ids.join(",");
+  if (el.dataset.key === key) { el.querySelectorAll("button").forEach(b => b.hidden = state.done || !state.canWrite); return; }
+  el.dataset.key = key;
+  el.innerHTML = ids.map(id => `<div class="paste" data-zoom><img src="/_blob/${esc(encodeURIComponent(id))}" alt="Pasted screenshot" onerror="this.alt='Screenshot removed'"><button type="button" data-unpaste="${esc(id)}" aria-label="Remove screenshot"${state.done || !state.canWrite ? " hidden" : ""}>×</button></div>`).join("");
+}
+
+function render() {
+  const locked = state.done || !state.canWrite || !state.db;
+  document.querySelectorAll(".card").forEach(card => {
+    const id = card.dataset.ref;
+    const d = refDoc(id);
+    const v = d.vote || "";
+    card.dataset.state = v;
+    card.querySelector(".up").setAttribute("aria-pressed", v === "up");
+    card.querySelector(".part").setAttribute("aria-pressed", v === "part");
+    card.querySelector(".down").setAttribute("aria-pressed", v === "down");
+    card.querySelector("textarea").placeholder = (NOTE_HINT[v] || NOTE_HINT[""]) + (state.assets ? " Paste a screenshot with ⌘V." : "");
+    card.hidden = (state.filter === "open" && v) || (state.filter !== "all" && state.filter !== "open" && v !== state.filter);
+  });
+  document.querySelectorAll("textarea[data-path]").forEach(ta => {
+    const d = state.docs[ta.dataset.path] || {};
+    if (document.activeElement !== ta && !ta.dataset.dirty) ta.value = d.note || "";
+    ta.disabled = locked;
+  });
+  document.querySelectorAll(".vote button").forEach(b => b.disabled = locked);
+  document.querySelectorAll("[data-pastes]").forEach(el => renderPastes(el, (state.docs[el.dataset.pastes] || {}).images || []));
+  const marked = REFS.filter(r => refDoc(r.id).vote).length;
+  const up = REFS.filter(r => refDoc(r.id).vote === "up").length;
+  document.getElementById("doneCount").textContent = marked;
+  document.getElementById("upCount").textContent = up;
+  document.getElementById("partCount").textContent = REFS.filter(r => refDoc(r.id).vote === "part").length;
+  document.getElementById("barFill").style.width = (REFS.length ? marked / REFS.length * 100 : 0) + "%";
+  PARTS.forEach(p => {
+    const n = REFS.filter(r => r.part === p.id && ["up", "part"].includes(refDoc(r.id).vote)).length;
+    document.querySelector(`[data-count="${p.id}"]`).textContent = n ? n + " ✓" : "";
+  });
+  const canToggle = state.db && state.canWrite;
+  ["doneRail", "doneBottom"].forEach(bid => {
+    const b = document.getElementById(bid);
+    b.disabled = !canToggle;
+    b.textContent = state.done ? "Reopen" : "I'm done";
+    b.classList.toggle("reopen", state.done);
+  });
+  const banner = document.getElementById("banner");
+  banner.hidden = !state.done;
+  if (state.done) {
+    const when = state.doneAt ? new Date(state.doneAt).toLocaleString([], { dateStyle: "medium", timeStyle: "short" }) : "";
+    document.getElementById("bannerText").textContent = `Marked done${when ? " on " + when : ""}. Picks are locked so Claude reads the final version.`;
+    document.getElementById("reopenBanner").hidden = !canToggle;
+  }
+}
+
+// One write at a time per document. Each write sends the whole document.
+const queues = {};
+function writeDoc(path, patch, msg) {
+  if (!state.db || !state.canWrite) return Promise.resolve();
+  const savedEl = document.querySelector(`[data-saved="${path}"]`);
+  const next = Object.assign({}, state.docs[path] || {}, patch, { at: new Date().toISOString() });
+  state.docs[path] = next;
+  render();
+  queues[path] = (queues[path] || Promise.resolve()).then(async () => {
+    try {
+      await state.db.doc(path).set(state.docs[path]);
+      if (savedEl) savedEl.textContent = msg || "Draft saved";
+    } catch (e) {
+      if (savedEl) savedEl.textContent = e && e.code === "invalid_argument" ? "You can view picks here but not change them" : "Not saved. Try again.";
+    }
+  });
+  return queues[path];
+}
+function refMeta(id) { const r = REFS.find(x => x.id === id); return { site: r.site, part: r.part }; }
+
+async function addImages(path, files) {
+  const savedEl = document.querySelector(`[data-saved="${path}"]`);
+  if (!state.assets) { if (savedEl) savedEl.textContent = "Screenshots can't be added in this view."; return; }
+  for (const f of files) {
+    if (savedEl) savedEl.textContent = "Uploading screenshot…";
+    try {
+      const res = await state.assets.upload(f, f.type ? undefined : { type: "image/png" });
+      const images = ((state.docs[path] || {}).images || []).concat(res.id);
+      const extra = path.startsWith("votes/") ? refMeta(path.slice(6)) : {};
+      await writeDoc(path, Object.assign({ images }, extra), "Screenshot added");
+    } catch (e) {
+      const m = { too_large: "That image is over 20 MB.", unsupported_type: "Only PNG, JPEG, GIF or WebP images.", rate_limited: "Too many uploads at once. Wait a moment." }[e && e.code];
+      if (savedEl) savedEl.textContent = m || "Couldn't add the screenshot. Try again.";
+    }
+  }
+}
+
+function wire() {
+  document.addEventListener("click", async e => {
+    const vb = e.target.closest("button[data-vote]");
+    if (vb) {
+      if (vb.disabled) return;
+      const id = vb.closest(".card").dataset.ref;
+      const cur = refDoc(id).vote || "";
+      writeDoc("votes/" + id, Object.assign({ vote: cur === vb.dataset.vote ? "" : vb.dataset.vote }, refMeta(id)));
+      return;
+    }
+    const un = e.target.closest("button[data-unpaste]");
+    if (un) {
+      e.stopPropagation();
+      const path = un.closest("[data-pastes]").dataset.pastes;
+      const aid = un.dataset.unpaste;
+      await writeDoc(path, { images: ((state.docs[path] || {}).images || []).filter(x => x !== aid) }, "Screenshot removed");
+      try { await state.assets.delete(aid); } catch (_) {}
+      return;
+    }
+    const fb = e.target.closest("button[data-frame]");
+    if (fb) {
+      const card = fb.closest(".card"); const r = REFS.find(x => x.id === card.dataset.ref);
+      card.querySelector(".shot img").src = "refs/" + (fb.dataset.frame === "2" ? r.img2 : r.img);
+      card.querySelectorAll("[data-frame]").forEach(b => b.setAttribute("aria-pressed", b === fb));
+      return;
+    }
+    const z = e.target.closest("[data-zoom]");
+    if (z) {
+      const img = z.querySelector("img");
+      if (!img || img.hidden) return;
+      document.getElementById("zoomImg").src = img.src;
+      document.getElementById("zoom").showModal(); return;
+    }
+    const f = e.target.closest("[data-filter]");
+    if (f) {
+      state.filter = f.dataset.filter;
+      document.querySelectorAll("[data-filter]").forEach(b => b.setAttribute("aria-pressed", b === f));
+      render(); return;
+    }
+    if (e.target.closest("#doneRail, #doneBottom, #reopenBanner")) {
+      const done = !state.done;
+      state.done = done; state.doneAt = done ? new Date().toISOString() : "";
+      writeDoc("round/state", { status: done ? "done" : "open", doneAt: state.doneAt });
+      if (done) window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  });
+  document.getElementById("zoomClose").addEventListener("click", () => document.getElementById("zoom").close());
+  document.getElementById("zoom").addEventListener("click", e => { if (e.target.id === "zoom") e.target.close(); });
+
+  const timers = {};
+  document.addEventListener("input", e => {
+    const ta = e.target.closest("textarea[data-path]");
+    if (!ta) return;
+    const path = ta.dataset.path;
+    ta.dataset.dirty = "1";
+    clearTimeout(timers[path]);
+    timers[path] = setTimeout(async () => {
+      delete timers[path];
+      const extra = path.startsWith("votes/") ? refMeta(path.slice(6)) : {};
+      const p = writeDoc(path, Object.assign({ note: ta.value }, extra));
+      delete ta.dataset.dirty;
+      await p;
+    }, 800);
+  });
+  document.addEventListener("paste", e => {
+    const ta = e.target.closest && e.target.closest("textarea[data-path]");
+    if (!ta || ta.disabled) return;
+    const files = [...(e.clipboardData?.files || [])].filter(f => f.type.startsWith("image/"));
+    if (!files.length) return;
+    if (!(e.clipboardData.getData("text/plain"))) e.preventDefault();
+    addImages(ta.dataset.path, files);
+  });
+  document.addEventListener("dragover", e => {
+    const ta = e.target.closest && e.target.closest("textarea[data-path]");
+    if (ta && !ta.disabled) { e.preventDefault(); ta.classList.add("dragover"); }
+  });
+  document.addEventListener("dragleave", e => { const ta = e.target.closest && e.target.closest("textarea"); if (ta) ta.classList.remove("dragover"); });
+  document.addEventListener("drop", e => {
+    const ta = e.target.closest && e.target.closest("textarea[data-path]");
+    if (!ta || ta.disabled) return;
+    ta.classList.remove("dragover");
+    const files = [...(e.dataTransfer?.files || [])].filter(f => f.type.startsWith("image/"));
+    if (!files.length) return;
+    e.preventDefault();
+    addImages(ta.dataset.path, files);
+  });
+}
+
+function applySnapshot(collection, snap) {
+  snap.docs.forEach(d => {
+    const path = collection + "/" + d.id;
+    if (Object.prototype.hasOwnProperty.call(queues, path) && d.metadata.hasPendingWrites) return;
+    state.docs[path] = Object.assign({}, d.data() || {});
+  });
+  const rs = state.docs["round/state"];
+  if (rs) { state.done = rs.status === "done"; state.doneAt = rs.doneAt || ""; }
+  render();
+}
+
+async function connect() {
+  const status = document.getElementById("status");
+  try { await connectStore(status); }
+  catch (e) {
+    // A half-made connection must never unlock editing: saving over an empty view could erase saved picks.
+    state.db = null; state.canWrite = false; state.assets = null;
+    status.textContent = "Couldn't connect, so picks can't be saved. Reload to try again.";
+    status.classList.add("warn");
+    render();
+  }
+}
+async function connectStore(status) {
+  const db = window.claude ? await window.claude.use("db") : null;
+  if (!db) {
+    status.textContent = "Picks can't be saved in this view. Open the board from claude.ai while signed in.";
+    status.classList.add("warn");
+    return;
+  }
+  state.db = db;
+  const user = await window.claude.use("user");
+  const can = user ? await user.can("data.write") : null;
+  state.canWrite = can !== false;
+  state.assets = state.canWrite ? await window.claude.use("assets") : null;
+  status.textContent = state.canWrite ? (state.assets ? "Drafts save as you go. Paste screenshots into notes." : "Drafts save as you go.") : "View only. Picks are shown but can't be changed here.";
+  const fail = () => { status.textContent = "Lost the connection. Reload to keep saving."; status.classList.add("warn"); };
+  ["votes", "parts", "round"].forEach(c => db.collection(c).onSnapshot(snap => applySnapshot(c, snap), fail));
+  render();
+}
+
+build(); wire(); render(); connect();
+</script>
