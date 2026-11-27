@@ -134,3 +134,7 @@ goes on.
 ## Licence
 
 MIT. See `LICENSE` at the top of this repository.
+
+## What changed
+
+- **1.0.0 (2026-11-26):** first version.

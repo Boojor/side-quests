@@ -139,4 +139,5 @@ MIT. See `LICENSE` at the top of this repository.
 
 ## What changed
 
+- **1.0.1 (2026-11-27):** the demo video plays right on this page.
 - **1.0 (2026-11-27):** first version.
