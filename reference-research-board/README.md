@@ -1,5 +1,9 @@
 # reference-research-board
 
+
+https://github.com/user-attachments/assets/62698782-44f6-4894-ad41-14df5d6d2924
+
+
 I need to design something. A homepage, a poster, a set of posts. No idea yet what it should look like.
 
 So I go looking. Forty tabs, saved pins, screenshots on the desktop. Half of it is the same five things
@@ -15,7 +19,6 @@ and builds a board. I mark what I'd steal and why. Claude reads my marks back.
 
 The board is the part I answer. The research is the part it does for me.
 
-**[Watch the 52-second demo](video/reference-research-board-demo.mp4)**
 
 ## What it does
 
