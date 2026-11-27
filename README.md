@@ -9,6 +9,7 @@ Detours I took when something kept breaking my flow. Each one fixed it. Help you
 | [jargon-less-mode](jargon-less-mode/) | Every reply ends with just the TL;DR you need: what to decide, what could break, what nobody checked. |
 | [work-timer](work-timer/) | Pings you when Claude has worked 10 minutes with nothing to show you, and nudges Claude to show you something. |
 | [reference-research-board](reference-research-board/) | Does the visual research for your brief and builds a board you mark up: steal, partial, skip. |
+| [vet-skill-3rd-party](vet-skill-3rd-party/) | Before you install a package, repo, extension or skill, Claude reads every file and tells you: GO, CAUTION or NO-GO. |
 
 Click an item for what it does and how to set it up.
 
